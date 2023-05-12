@@ -1,22 +1,25 @@
 {
   "name": "lunchly",
   "version": "1.0.0",
-  "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "*",
-    "express": "^5.0.0-beta",
+    "express": "^5.0.0-beta.1",
     "moment": "*",
+    "morgan": "^1.10.0",
     "nunjucks": "*",
-    "pg": "*"
+    "pg": "^8.10.0"
   },
   "devDependencies": {
     "jest": "*",
-    "supertest": "*"
-  }
+    "supertest": "^6.3.3"
+  },
+  "keywords": [],
+  "description": ""
 }
