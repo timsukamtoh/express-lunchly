@@ -21,9 +21,14 @@ class Customer {
     return this.firstName + ' ' + this.lastName;
   }
 
-  /** find all customers. */
+  /**Find customers - can be all or based on name search
+   * @param {String?} search
+   * @returns an array of customer instances
+   */
 
-  static async all() {
+  static async all(search) {
+    search = search? search.toLowerCase() : ''
+
     const results = await db.query(
       `SELECT id,
                   first_name AS "firstName",
@@ -31,26 +36,10 @@ class Customer {
                   phone,
                   notes
            FROM customers
+           WHERE LOWER(first_name) LIKE '%${search}%' OR
+                 LOWER(last_name) LIKE '%${search}%' OR
+                 LOWER(CONCAT(first_name,' ',last_name)) LIKE '%${search}%'
            ORDER BY last_name, first_name`,
-    );
-    return results.rows.map(c => new Customer(c));
-  }
-
-  /** find all customers by a name. */
-
-  static async searchByName(name) {
-    const results = await db.query(
-      `SELECT id,
-                  first_name AS "firstName",
-                  last_name  AS "lastName",
-                  phone,
-                  notes
-           FROM customers
-           WHERE LOWER(first_name) LIKE '%$1%' OR
-                 LOWER(last_name) LIKE '%$1%' OR
-                 LOWER(CONCAT(first_name,' ',last_name)) LIKE '%$1%'
-           ORDER BY last_name, first_name`,
-      [name]
     );
     return results.rows.map(c => new Customer(c));
   }
