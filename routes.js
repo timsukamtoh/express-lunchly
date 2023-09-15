@@ -14,9 +14,15 @@ const router = new express.Router();
 
 router.get("/", async function (req, res, next) {
   const { search } = req.query
-  console.log("\n\n params =", req.query)
-  console.log("\n\n search =", search)
+
   const customers = await Customer.all(search);
+  return res.render("customer_list.html", { customers });
+});
+
+/** TopTen: show list of the top ten customers. */
+
+router.get("/top-ten/", async function (req, res, next) {
+  const customers = await Customer.getBestCustomers();
   return res.render("customer_list.html", { customers });
 });
 

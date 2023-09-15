@@ -17,17 +17,17 @@ class Customer {
   }
 
   /** return full name of customer */
-  fullName() {
-    return this.firstName + ' ' + this.lastName;
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
   }
 
-  /**Find customers - can be all or based on name search
-   * @param {String?} search
-   * @returns an array of customer instances
+  /**
+   * Find customers - can be all or based on name search
+   * @param {String?} search the search term
+   * @returns an array of Customer instances
    */
-
-  static async all(search) {
-    search = search? search.toLowerCase() : ''
+  static async all(search = '') {
+    search = search.toLowerCase();
 
     const results = await db.query(
       `SELECT id,
@@ -36,10 +36,32 @@ class Customer {
                   phone,
                   notes
            FROM customers
-           WHERE LOWER(first_name) LIKE '%${search}%' OR
-                 LOWER(last_name) LIKE '%${search}%' OR
-                 LOWER(CONCAT(first_name,' ',last_name)) LIKE '%${search}%'
+           WHERE LOWER(CONCAT(first_name,' ',last_name)) LIKE $1
            ORDER BY last_name, first_name`,
+      [`%${search}%`]
+    );
+    return results.rows.map(c => new Customer(c));
+  }
+
+  /**
+   * Performs query and returns array of Customers ordered by reservation count desc
+   * @param {Int?} limit the number of results to limit to
+   * @returns an array of Customer instances
+   */
+  static async getBestCustomers(limit = 10) {
+    const results = await db.query(
+      `SELECT customers.id,
+              customers.first_name AS "firstName",
+              customers.last_name  AS "lastName",
+              customers.phone,
+              customers.notes
+            FROM customers
+            JOIN reservations
+            ON reservations.customer_id = customers.id
+            GROUP BY customers.id
+            ORDER BY count(reservations.id) DESC
+            LIMIT $1`,
+      [limit]
     );
     return results.rows.map(c => new Customer(c));
   }
@@ -102,6 +124,16 @@ class Customer {
       ],
       );
     }
+  }
+
+  /***** Misc Getters / Setters  ******/
+
+  get notes() {
+    return this._notes;
+  }
+
+  set notes(newNotes) {
+    this._notes = newNotes? newNotes : '';
   }
 }
 

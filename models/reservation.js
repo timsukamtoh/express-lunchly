@@ -11,10 +11,10 @@ const db = require("../db");
 class Reservation {
   constructor({ id, customerId, startAt, numGuests, notes }) {
     this.id = id;
-    this.customerId = customerId;
-    this.startAt = startAt;
-    this.numGuests = numGuests;
-    this.notes = notes;
+    this._customerId = customerId;
+    this._startAt = startAt;
+    this._numGuests = numGuests;
+    this._notes = notes;
   }
 
   /** formatter for startAt */
@@ -27,14 +27,14 @@ class Reservation {
 
   static async getReservationsForCustomer(customerId) {
     const results = await db.query(
-          `SELECT id,
+      `SELECT id,
                   customer_id AS "customerId",
                   num_guests AS "numGuests",
                   start_at AS "startAt",
                   notes AS "notes"
            FROM reservations
            WHERE customer_id = $1`,
-        [customerId],
+      [customerId],
     );
 
     return results.rows.map(row => new Reservation(row));
@@ -66,6 +66,62 @@ class Reservation {
         this.id,
       ],
       );
+    }
+  }
+
+  /***** Misc Getters / Setters  ******/
+
+  /**get notes */
+  get notes() {
+    return this._notes;
+  }
+
+  /**set notes */
+  set notes(newNotes) {
+    this._notes = newNotes ? newNotes : '';
+  }
+
+  /**get numGuests */
+  get numGuests() {
+    return this._notes;
+  }
+
+  /**set numGuests to number
+   * if number less than 1, throw an error without setting
+   */
+  set numGuests(number) {
+    if (number < 1) {
+      throw new Error("Must have at least 1 guest");
+    } else {
+      this._numGuests = number;
+    }
+  }
+
+  /**get startAt */
+  get startAt() {
+    return this._startAt;
+  }
+
+  /**set startAt */
+  set startAt(date) {
+    if (!(date instanceof Date)) {
+      throw new Error("Must set to instance of date");
+    } else {
+      this._startAt = date;
+    }
+  }
+
+  /**get customer_id */
+  get customerId() {
+    return this._customerId;
+  }
+
+  /**set notes */
+  set customerId(id) {
+    if (this._customerId) {
+      throw new Error("Cannot set reservation to different customer");
+    } else {
+      this._customerId = id;
     }
   }
 }
